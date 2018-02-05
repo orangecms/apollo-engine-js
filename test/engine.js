@@ -180,7 +180,7 @@ describe('engine', () => {
     it('accepts configuration of overridden headers', async () => {
       const overrideRequestHeaders = {
         "Host": "example.com",
-        "X-Does-Not-Exist": "huehue"
+        "X-Does-Not-Exist": "huehue",
       };
       engine = new Engine({
         graphqlPort: 1,
@@ -196,9 +196,26 @@ describe('engine', () => {
         }
       });
 
-      for (var key in overrideRequestHeaders) {
-        assert.strictEqual(engine.originParams.http.overrideRequestHeaders[key], overrideRequestHeaders[key]);
-      }
+      assert.equal(engine.originParams.http.overrideRequestHeaders, overrideRequestHeaders);
+    });
+
+    it('does not override origin url', async () => {
+      const userSpecifiedUrl = 'https://localhost:1000/graphql';
+      engine = new Engine({
+        graphqlPort: 1,
+        origin: {
+          http: {
+            url: userSpecifiedUrl
+          }
+        },
+        engineConfig: {
+          reporting: {
+            disabled: true
+          }
+        }
+      });
+
+      assert.strictEqual(userSpecifiedUrl, engine.originParams.http.url);
     });
 
     it('can be configured to use a custom default logger', async () => {
